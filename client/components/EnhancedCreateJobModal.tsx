@@ -461,6 +461,59 @@ export function EnhancedCreateJobModal({
                   ))}
                 </SelectContent>
               </Select>
+
+              {/* Smart Suggestions Display */}
+              {smartSuggestions.length > 0 && (
+                <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Users className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-medium text-blue-800">
+                      Recommended Staff (by proximity & availability)
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {smartSuggestions.map((suggestion, index) => (
+                      <div
+                        key={suggestion.staffMember.id}
+                        className={`flex items-center justify-between p-2 rounded cursor-pointer transition-colors ${
+                          jobData.assignedTo === suggestion.staffMember.id
+                            ? "bg-blue-100 border border-blue-300"
+                            : "bg-white hover:bg-blue-50"
+                        }`}
+                        onClick={() =>
+                          setJobData((prev) => ({
+                            ...prev,
+                            assignedTo: suggestion.staffMember.id,
+                          }))
+                        }
+                      >
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">
+                              {index === 0 && "🥇"}{" "}
+                              {suggestion.staffMember.name}
+                            </span>
+                            <Badge
+                              variant={index === 0 ? "default" : "secondary"}
+                              className="text-xs"
+                            >
+                              {suggestion.distance.toFixed(1)}km
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {suggestion.reason}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xs text-muted-foreground">
+                            {suggestion.travelTime.toFixed(0)}min travel
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
