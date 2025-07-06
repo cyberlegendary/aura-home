@@ -28,6 +28,8 @@ import {
   Clock,
   Calendar,
   AlertTriangle,
+  MapPin,
+  Users,
 } from "lucide-react";
 import { parseJobText, type ParsedJobData } from "@/utils/textParser";
 import { useAuth } from "@/contexts/AuthContext";
