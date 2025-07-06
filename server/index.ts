@@ -63,6 +63,12 @@ import {
 export function createServer() {
   const app = express();
 
+  // Configure multer for file uploads
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  });
+
   // Middleware
   app.use(cors());
   app.use(express.json({ limit: "10mb" }));
