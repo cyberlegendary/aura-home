@@ -51,6 +51,13 @@ import {
   handleGenerateSAHLPDF,
   handleViewFormPDF,
 } from "./routes/pdf";
+import {
+  handleCreatePDFTemplate,
+  handleGetPDFTemplates,
+  handleUpdatePDFTemplate,
+  handleDeletePDFTemplate,
+  handleDownloadFilledForm,
+} from "./routes/pdfTemplates";
 
 export function createServer() {
   const app = express();
@@ -120,6 +127,15 @@ export function createServer() {
   app.post("/api/pdf/absa", handleGenerateABSAPDF);
   app.post("/api/pdf/sahl", handleGenerateSAHLPDF);
   app.post("/api/pdf/view", handleViewFormPDF);
+
+  // PDF Template routes
+  app.post("/api/pdf-templates", handleCreatePDFTemplate);
+  app.get("/api/pdf-templates", handleGetPDFTemplates);
+  app.put("/api/pdf-templates/:id", handleUpdatePDFTemplate);
+  app.delete("/api/pdf-templates/:id", handleDeletePDFTemplate);
+
+  // Form download routes
+  app.get("/api/forms/download-filled", handleDownloadFilledForm);
 
   // Legacy demo route
   app.get("/api/demo", handleDemo);
