@@ -178,6 +178,149 @@ export const handleGenerateABSAPDF: RequestHandler = async (req, res) => {
   }
 };
 
+export const handleGenerateSAHLPDF: RequestHandler = async (req, res) => {
+  try {
+    const formData = req.body;
+
+    if (!formData) {
+      return res.status(400).json({ error: "Form data is required" });
+    }
+
+    // Path to the SAHL PDF template
+    const templatePath = path.join(__dirname, "../templates/sahlld.pdf");
+
+    // Check if template file exists
+    try {
+      await fs.access(templatePath);
+    } catch {
+      return res.status(404).json({ error: "SAHL PDF template not found" });
+    }
+
+    // Load the PDF template
+    const templateBytes = await fs.readFile(templatePath);
+    const pdfDoc = await PDFDocument.load(templateBytes);
+
+    // Get the form
+    const form = pdfDoc.getForm();
+    const fieldNames = form.getFields().map((f) => f.getName());
+    console.log({ fieldNames });
+
+    // Fill form fields
+    if (formData.ClientName) {
+      form.getTextField("ClientName_ZIUG").setText(formData.ClientName);
+    }
+    if (formData.ClientRef) {
+      form.getTextField("ClientRef").setText(formData.ClientRef);
+    }
+    if (formData.ClientAddress) {
+      form.getTextField("ClientAddress").setText(formData.ClientAddress);
+    }
+    if (formData.ClientDamage) {
+      form.getTextField("ClientDamage").setText(formData.ClientDamage);
+    }
+    if (formData.StaffName) {
+      form.getTextField("StaffName").setText(formData.StaffName);
+    }
+    if (formData.textarea_26kyol) {
+      form.getTextField("textarea_26kyol").setText(formData.textarea_26kyol);
+    }
+
+    // Handle checkboxes
+    if (formData.CheckBox1 === "Yes" || formData.CheckBox1 === "yes") {
+      form.getTextField("CheckBox1-1").setText("X");
+    } else {
+      form.getTextField("CheckBox1-2").setText("X");
+    }
+
+    if (formData.CheckBox2 === "Yes" || formData.CheckBox2 === "yes") {
+      form.getTextField("CheckBox2-1").setText("X");
+    } else {
+      form.getTextField("CheckBox2-2").setText("X");
+    }
+
+    if (formData.CheckBox3 === "Yes" || formData.CheckBox3 === "yes") {
+      form.getTextField("CheckBox3-1").setText("X");
+    } else {
+      form.getTextField("CheckBox3-2").setText("X");
+    }
+
+    if (formData.CheckBox4 === "Yes" || formData.CheckBox4 === "yes") {
+      form.getTextField("CheckBox4-1").setText("X");
+    } else {
+      form.getTextField("CheckBox4-2").setText("X");
+    }
+
+    if (formData.CheckBox5 === "Yes" || formData.CheckBox5 === "yes") {
+      form.getTextField("CheckBox5-1").setText("X");
+    } else {
+      form.getTextField("CheckBox5-2").setText("X");
+    }
+
+    // Set current date
+    const now = new Date();
+    form.getTextField("Date").setText(
+      now.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }),
+    );
+
+    // Handle CheckBox6 (numbered field)
+    if (formData.CheckBox6 > 0) {
+      const fieldName = `CheckBox6-${formData.CheckBox6}`;
+      form.getTextField(fieldName).setText("X");
+    }
+
+    // Handle signature if provided
+    if (formData.signature) {
+      try {
+        const response = await fetch(formData.signature);
+        const pngImageBytes = await response.arrayBuffer();
+        const pngImage = await pdfDoc.embedPng(pngImageBytes);
+        const pngDims = pngImage.scale(0.2);
+        const pages = pdfDoc.getPages();
+        const firstPage = pages[0];
+
+        firstPage.drawImage(pngImage, {
+          x: pngDims.width + 16,
+          y: pngDims.height / 26,
+          width: pngDims.width,
+          height: pngDims.height,
+        });
+      } catch (error) {
+        console.warn("Failed to embed signature:", error);
+      }
+    }
+
+    if (formData.CheckBox7 === "Yes" || formData.CheckBox7 === "yes") {
+      form.getTextField("CheckBox7-1").setText("X");
+    } else {
+      form.getTextField("CheckBox7-2").setText("X");
+    }
+
+    // Flatten form (make it non-editable)
+    form.flatten();
+
+    // Save the PDF
+    const pdfBytes = await pdfDoc.save();
+
+    // Set response headers
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="SAHL_Form.pdf"',
+    );
+    res.setHeader("Content-Length", pdfBytes.length);
+
+    // Send the PDF
+    res.send(Buffer.from(pdfBytes));
+  } catch (error) {
+    console.error("SAHL PDF generation error:", error);
+    res.status(500).json({ error: "Failed to generate SAHL PDF" });
+  }
+};
+
 export const handleViewFormPDF: RequestHandler = async (req, res) => {
   try {
     const { formType, formData } = req.body;
@@ -185,6 +328,8 @@ export const handleViewFormPDF: RequestHandler = async (req, res) => {
     switch (formType) {
       case "absa":
         return handleGenerateABSAPDF(req, res);
+      case "sahl":
+        return handleGenerateSAHLPDF(req, res);
       default:
         return res.status(400).json({ error: "Unsupported form type" });
     }
