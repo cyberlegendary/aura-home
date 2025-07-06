@@ -47,6 +47,7 @@ import { NoncomplianceForm } from "@/components/NoncomplianceForm";
 import { EnhancedLiabilityForm } from "@/components/EnhancedLiabilityForm";
 import { EnhancedShiftManagement } from "@/components/EnhancedShiftManagement";
 import { ClientManagement } from "@/components/ClientManagement";
+import { FormSubmissionList } from "@/components/FormSubmissionCounter";
 import { CompanyManagementModal } from "@/components/CompanyManagementModal";
 import { FormEditModal } from "@/components/FormEditModal";
 import { PDFFormGenerator } from "@/components/PDFFormGenerator";
