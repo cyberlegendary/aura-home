@@ -51,6 +51,7 @@ import { ClientManagement } from "@/components/ClientManagement";
 import { FormSubmissionList } from "@/components/FormSubmissionCounter";
 import { getCalendarVisibleJobs } from "@/utils/jobVisibility";
 import { StaffPortalView } from "@/components/StaffPortalView";
+import { PDFTemplateManager } from "@/components/PDFTemplateManager";
 import { CompanyManagementModal } from "@/components/CompanyManagementModal";
 import { FormEditModal } from "@/components/FormEditModal";
 import { PDFFormGenerator } from "@/components/PDFFormGenerator";
