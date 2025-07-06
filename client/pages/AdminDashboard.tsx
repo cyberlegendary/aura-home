@@ -48,6 +48,7 @@ import { EnhancedLiabilityForm } from "@/components/EnhancedLiabilityForm";
 import { EnhancedShiftManagement } from "@/components/EnhancedShiftManagement";
 import { ClientManagement } from "@/components/ClientManagement";
 import { FormSubmissionList } from "@/components/FormSubmissionCounter";
+import { getCalendarVisibleJobs } from "@/utils/jobVisibility";
 import { CompanyManagementModal } from "@/components/CompanyManagementModal";
 import { FormEditModal } from "@/components/FormEditModal";
 import { PDFFormGenerator } from "@/components/PDFFormGenerator";
@@ -139,12 +140,15 @@ export default function AdminDashboard() {
     }
   };
 
-  // Filter jobs based on search term
+  // Filter jobs based on user permissions and search term
   const filteredJobs = React.useMemo(() => {
-    if (!searchTerm.trim()) return jobs;
+    // First apply user-based filtering
+    const visibleJobs = user ? getCalendarVisibleJobs(jobs, user) : jobs;
+
+    if (!searchTerm.trim()) return visibleJobs;
 
     const term = searchTerm.toLowerCase();
-    return jobs.filter(
+    return visibleJobs.filter(
       (job) =>
         job.title.toLowerCase().includes(term) ||
         job.description.toLowerCase().includes(term) ||
@@ -153,7 +157,7 @@ export default function AdminDashboard() {
         (job.policyNo && job.policyNo.toLowerCase().includes(term)) ||
         (job.riskAddress && job.riskAddress.toLowerCase().includes(term)),
     );
-  }, [jobs, searchTerm]);
+  }, [jobs, searchTerm, user]);
 
   const stats = {
     totalJobs: jobs.length,
