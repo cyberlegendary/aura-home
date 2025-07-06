@@ -909,6 +909,16 @@ export default function AdminDashboard() {
                 <div className="flex justify-between items-center">
                   <CardTitle>Form Management</CardTitle>
                   <div className="space-x-2">
+                    {user?.role === "admin" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setShowPDFTemplateManager(true)}
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        PDF Templates
+                      </Button>
+                    )}
                     <Button size="sm" onClick={() => setShowCreateForm(true)}>
                       <Plus className="h-4 w-4 mr-2" />
                       Create Form
