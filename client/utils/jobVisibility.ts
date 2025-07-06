@@ -186,14 +186,10 @@ export function getCalendarVisibleJobs(jobs: Job[], user: User): Job[] {
 }
 
 /**
- * Determines if user can edit/update forms
+ * Determines if user can edit/update forms (apollos cannot update forms)
  */
 export function canEditForms(user: User): boolean {
   const isAdmin = user.role === "admin";
-  const isSupervisor = user.role === "supervisor";
-  const isApollos =
-    user.location?.city === "Cape Town" ||
-    user.username?.toLowerCase().includes("apollos");
-
-  return isAdmin || isSupervisor || isApollos;
+  // Remove ability for apollos (supervisors) to update forms
+  return isAdmin;
 }
