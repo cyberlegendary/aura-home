@@ -31,6 +31,10 @@ import {
 } from "lucide-react";
 import { parseJobText, type ParsedJobData } from "@/utils/textParser";
 import { useAuth } from "@/contexts/AuthContext";
+import {
+  getSmartJobSuggestions,
+  type JobSuggestion,
+} from "@/utils/smartJobAssignment";
 
 interface EnhancedCreateJobModalProps {
   open: boolean;
