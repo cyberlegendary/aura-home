@@ -531,23 +531,110 @@ export default function AdminDashboard() {
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="jobs" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-12">
-            <TabsTrigger value="jobs">Jobs</TabsTrigger>
-            <TabsTrigger value="calendar">Calendar</TabsTrigger>
-            <TabsTrigger value="schedule">Schedule</TabsTrigger>
-            <TabsTrigger value="salary">Salary</TabsTrigger>
-            <TabsTrigger value="materials">Materials</TabsTrigger>
-            <TabsTrigger value="clients">Clients</TabsTrigger>
-            <TabsTrigger value="forms">Forms</TabsTrigger>
-            <TabsTrigger value="staff">Staff</TabsTrigger>
-            <TabsTrigger value="staff-mgmt">Staff Mgmt</TabsTrigger>
-            {user?.role === "admin" && (
-              <TabsTrigger value="companies">Companies</TabsTrigger>
+        <Tabs
+          value={activeTab || "analytics"}
+          onValueChange={setActiveTab}
+          className="space-y-6"
+        >
+          <div className="flex items-center justify-between">
+            {user?.role === "supervisor" ? (
+              // Apollo view - Only main tabs + settings dropdown
+              <div className="flex items-center gap-2 w-full">
+                <TabsList className="flex-1">
+                  <TabsTrigger value="jobs">Jobs</TabsTrigger>
+                  <TabsTrigger value="schedule">Schedule</TabsTrigger>
+                  <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                </TabsList>
+                <div className="relative">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleSettingsClick}
+                    className="ml-2"
+                  >
+                    <Settings
+                      className={`h-4 w-4 transition-transform duration-300 ${
+                        isSettingsSpinning ? "animate-spin" : ""
+                      }`}
+                    />
+                    <ChevronDown className="h-3 w-3 ml-1" />
+                  </Button>
+                  {showSettingsDropdown && (
+                    <div className="absolute top-full right-0 mt-1 w-48 bg-white border rounded-lg shadow-lg z-50">
+                      <div className="py-1">
+                        <button
+                          onClick={() => handleTabSelect("calendar")}
+                          className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                        >
+                          Calendar
+                        </button>
+                        <button
+                          onClick={() => handleTabSelect("salary")}
+                          className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                        >
+                          Salary
+                        </button>
+                        <button
+                          onClick={() => handleTabSelect("materials")}
+                          className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                        >
+                          Materials
+                        </button>
+                        <button
+                          onClick={() => handleTabSelect("clients")}
+                          className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                        >
+                          Clients
+                        </button>
+                        <button
+                          onClick={() => handleTabSelect("forms")}
+                          className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                        >
+                          Forms
+                        </button>
+                        <button
+                          onClick={() => handleTabSelect("staff")}
+                          className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                        >
+                          Staff
+                        </button>
+                        <button
+                          onClick={() => handleTabSelect("staff-mgmt")}
+                          className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                        >
+                          Staff Mgmt
+                        </button>
+                        <button
+                          onClick={() => handleTabSelect("actuarial")}
+                          className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                        >
+                          Actuarial
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              // Admin view - All tabs visible
+              <TabsList className="grid w-full grid-cols-12">
+                <TabsTrigger value="jobs">Jobs</TabsTrigger>
+                <TabsTrigger value="calendar">Calendar</TabsTrigger>
+                <TabsTrigger value="schedule">Schedule</TabsTrigger>
+                <TabsTrigger value="salary">Salary</TabsTrigger>
+                <TabsTrigger value="materials">Materials</TabsTrigger>
+                <TabsTrigger value="clients">Clients</TabsTrigger>
+                <TabsTrigger value="forms">Forms</TabsTrigger>
+                <TabsTrigger value="staff">Staff</TabsTrigger>
+                <TabsTrigger value="staff-mgmt">Staff Mgmt</TabsTrigger>
+                {user?.role === "admin" && (
+                  <TabsTrigger value="companies">Companies</TabsTrigger>
+                )}
+                <TabsTrigger value="actuarial">Actuarial</TabsTrigger>
+                <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              </TabsList>
             )}
-            <TabsTrigger value="actuarial">Actuarial</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          </TabsList>
+          </div>
 
           {/* Jobs Tab */}
           <TabsContent value="jobs">
