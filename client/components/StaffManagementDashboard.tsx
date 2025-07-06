@@ -367,10 +367,31 @@ export function StaffManagementDashboard({
                             <FileText className="h-3 w-3" />
                             {stats.totalSubmissions} forms
                           </div>
-                          <Button size="sm" variant="outline">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleStaffClick(staffMember);
+                            }}
+                          >
                             <Eye className="h-3 w-3 mr-1" />
                             View Details
                           </Button>
+                          {(currentUser.role === "admin" ||
+                            currentUser.role === "supervisor") && (
+                            <Button
+                              size="sm"
+                              variant="default"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCreateJobForStaff(staffMember);
+                              }}
+                            >
+                              <Plus className="h-3 w-3 mr-1" />
+                              Add Job
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </CardContent>
