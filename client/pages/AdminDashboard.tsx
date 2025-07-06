@@ -19,6 +19,7 @@ import {
   Package,
   AlertCircle,
   Shield,
+  ChevronDown,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
