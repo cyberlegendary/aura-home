@@ -47,6 +47,9 @@ export function StaffManagementDashboard({
   const [selectedStaff, setSelectedStaff] = useState<UserType | null>(null);
   const [showImpersonation, setShowImpersonation] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showJobCreation, setShowJobCreation] = useState(false);
+  const [selectedStaffForJob, setSelectedStaffForJob] =
+    useState<UserType | null>(null);
   const [locationFilter, setLocationFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedStaffForCalendar, setSelectedStaffForCalendar] =
