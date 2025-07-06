@@ -510,7 +510,9 @@ export default function AdminDashboard() {
             <TabsTrigger value="forms">Forms</TabsTrigger>
             <TabsTrigger value="staff">Staff</TabsTrigger>
             <TabsTrigger value="staff-mgmt">Staff Mgmt</TabsTrigger>
-            <TabsTrigger value="companies">Companies</TabsTrigger>
+            {user?.role === "admin" && (
+              <TabsTrigger value="companies">Companies</TabsTrigger>
+            )}
             <TabsTrigger value="actuarial">Actuarial</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
