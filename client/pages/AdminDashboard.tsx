@@ -908,43 +908,54 @@ export default function AdminDashboard() {
                       <FileText className="h-5 w-5 mr-2 text-gray-600" />
                       Standard Forms
                     </h3>
-                    <div className="space-y-4">
-                      {forms.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
-                          No forms found. Create your first form to get started.
-                        </div>
-                      ) : (
-                        forms.map((form) => (
-                          <div
-                            key={form.id}
-                            className="border rounded-lg p-4 space-y-2 cursor-pointer hover:bg-gray-50 transition-colors"
-                            onClick={() => handleFormEdit(form)}
-                            title="Click to view and edit form details"
-                          >
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h3 className="font-medium">{form.name}</h3>
-                                <p className="text-sm text-gray-600">
-                                  {form.description}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                  {form.fields.length} fields
-                                </p>
-                              </div>
-                              <div className="flex space-x-2">
-                                {form.isTemplate && (
-                                  <Badge variant="secondary">Template</Badge>
-                                )}
-                                <Badge variant="outline">
-                                  {form.restrictedToCompanies?.length === 0
-                                    ? "All Companies"
-                                    : `${form.restrictedToCompanies?.length || 0} Companies`}
-                                </Badge>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                      <div className="lg:col-span-2 space-y-4">
+                        {forms.length === 0 ? (
+                          <div className="text-center py-8 text-gray-500">
+                            No forms found. Create your first form to get
+                            started.
+                          </div>
+                        ) : (
+                          forms.map((form) => (
+                            <div
+                              key={form.id}
+                              className="border rounded-lg p-4 space-y-2 cursor-pointer hover:bg-gray-50 transition-colors"
+                              onClick={() => handleFormEdit(form)}
+                              title="Click to view and edit form details"
+                            >
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h3 className="font-medium">{form.name}</h3>
+                                  <p className="text-sm text-gray-600">
+                                    {form.description}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    {form.fields.length} fields
+                                  </p>
+                                </div>
+                                <div className="flex space-x-2">
+                                  {form.isTemplate && (
+                                    <Badge variant="secondary">Template</Badge>
+                                  )}
+                                  <Badge variant="outline">
+                                    {form.restrictedToCompanies?.length === 0
+                                      ? "All Companies"
+                                      : `${form.restrictedToCompanies?.length || 0} Companies`}
+                                  </Badge>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))
-                      )}
+                          ))
+                        )}
+                      </div>
+
+                      {/* Form Submission Summary */}
+                      <div>
+                        <FormSubmissionList
+                          forms={forms}
+                          className="sticky top-4"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
