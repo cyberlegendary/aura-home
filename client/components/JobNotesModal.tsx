@@ -61,7 +61,13 @@ export function JobNotesModal({
 
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/jobs/${job.id}/notes`);
+      const token = localStorage.getItem("auth_token");
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`/api/jobs/${job.id}/notes`, { headers });
       if (response.ok) {
         const data = await response.json();
         setNotes(data);
