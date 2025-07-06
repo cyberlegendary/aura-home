@@ -20,6 +20,7 @@ import {
 } from "@/hooks/useEnhancedCalendar";
 import { JobActionButtons } from "./JobActionButtons";
 import { formatTravelTime } from "@/utils/locationUtils";
+import { getCalendarVisibleJobs } from "@/utils/jobVisibility";
 
 interface EnhancedCalendarGridProps {
   jobs: Job[];
