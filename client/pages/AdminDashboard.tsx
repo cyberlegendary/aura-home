@@ -110,8 +110,23 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (user && (user.role === "admin" || user.role === "supervisor")) {
       fetchData();
+      // Set default tab to analytics for admins and apollos
+      if (!activeTab) {
+        setActiveTab("analytics");
+      }
     } else {
       setLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    // Initialize default tab for apollos and admins
+    if (
+      user &&
+      (user.role === "admin" || user.role === "supervisor") &&
+      !activeTab
+    ) {
+      setActiveTab("analytics");
     }
   }, [user]);
 
