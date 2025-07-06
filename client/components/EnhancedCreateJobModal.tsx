@@ -81,6 +81,7 @@ export function EnhancedCreateJobModal({
   const [rawText, setRawText] = useState("");
   const [parseLoading, setParseLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("manual");
+  const [smartSuggestions, setSmartSuggestions] = useState<JobSuggestion[]>([]);
 
   const isAdmin = user?.role === "admin";
   const isSupervisor = user?.role === "supervisor";
@@ -132,6 +133,13 @@ export function EnhancedCreateJobModal({
       checkForDuplicates();
     }
   }, [jobData.assignedTo, jobData.dueDate, timeDetails.time]);
+
+  useEffect(() => {
+    // Calculate smart suggestions when parsed data has location
+    if (parsedData?.riskAddress && staff.length > 0) {
+      calculateSmartSuggestions();
+    }
+  }, [parsedData?.riskAddress, staff]);
 
   const fetchData = async () => {
     try {
@@ -187,6 +195,43 @@ export function EnhancedCreateJobModal({
       }
     } catch (error) {
       console.error("Error checking duplicates:", error);
+    }
+  };
+
+  const calculateSmartSuggestions = async () => {
+    if (!parsedData?.riskAddress) return;
+
+    try {
+      // Convert address to coordinates (in a real app, use geocoding service)
+      // For now, use mock coordinates based on city
+      let coordinates = { lat: -26.1076, lng: 28.0567 }; // Default Johannesburg
+
+      if (
+        parsedData.riskAddress.toLowerCase().includes("cape town") ||
+        parsedData.riskAddress.toLowerCase().includes("cape") ||
+        parsedData.riskAddress.toLowerCase().includes("western cape")
+      ) {
+        coordinates = { lat: -33.8903, lng: 18.4979 }; // Cape Town
+      }
+
+      // Fetch current jobs for workload calculation
+      const token = localStorage.getItem("auth_token");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const jobsResponse = await fetch("/api/jobs", { headers });
+      const allJobs = jobsResponse.ok ? await jobsResponse.json() : [];
+
+      const suggestions = getSmartJobSuggestions(coordinates, staff, allJobs);
+      setSmartSuggestions(suggestions.slice(0, 3)); // Show top 3 suggestions
+
+      // Auto-assign best suggestion if no staff is selected
+      if (!jobData.assignedTo && suggestions.length > 0) {
+        setJobData((prev) => ({
+          ...prev,
+          assignedTo: suggestions[0].staffMember.id,
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to calculate smart suggestions:", error);
     }
   };
 
