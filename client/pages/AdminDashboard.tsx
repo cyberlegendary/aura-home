@@ -1360,7 +1360,21 @@ export default function AdminDashboard() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics">
-            <AnalyticsDashboard jobs={jobs} staff={staff} />
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-2xl font-bold">Analytics Dashboard</h2>
+                  <p className="text-gray-600">
+                    Overview of system performance and metrics
+                  </p>
+                </div>
+                <Button onClick={() => setShowCreateJob(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Quick Create Job
+                </Button>
+              </div>
+              <AnalyticsDashboard jobs={jobs} staff={staff} />
+            </div>
           </TabsContent>
         </Tabs>
       </div>
