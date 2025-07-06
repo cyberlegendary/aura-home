@@ -265,6 +265,19 @@ export default function AdminDashboard() {
     setShowJobEdit(true);
   };
 
+  const handleSettingsClick = () => {
+    setIsSettingsSpinning(true);
+    setTimeout(() => {
+      setShowSettingsDropdown(!showSettingsDropdown);
+      setIsSettingsSpinning(false);
+    }, 300);
+  };
+
+  const handleTabSelect = (tabValue: string) => {
+    setActiveTab(tabValue);
+    setShowSettingsDropdown(false);
+  };
+
   const handleCreateJobWithTime = (
     staffId: string,
     timeSlot: string,
