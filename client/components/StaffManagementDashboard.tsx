@@ -169,6 +169,38 @@ export function StaffManagementDashboard({
     setShowImpersonation(true);
   };
 
+  const handleCreateJobForStaff = (staffMember: UserType) => {
+    setSelectedStaffForJob(staffMember);
+    setShowJobCreation(true);
+  };
+
+  const createJobForStaff = async (jobData: any) => {
+    try {
+      const token = localStorage.getItem("auth_token");
+      const headers = {
+        "Content-Type": "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }),
+      };
+
+      const response = await fetch("/api/jobs", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          ...jobData,
+          assignedTo: selectedStaffForJob?.id,
+        }),
+      });
+
+      if (response.ok) {
+        await fetchAllData(); // Refresh data
+        setShowJobCreation(false);
+        setSelectedStaffForJob(null);
+      }
+    } catch (error) {
+      console.error("Error creating job:", error);
+    }
+  };
+
   const formatLocation = (location: UserType["location"]) => {
     if (!location) return "Unknown";
     return location.city || "Unknown";
