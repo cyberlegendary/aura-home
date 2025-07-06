@@ -27,6 +27,8 @@ import {
   handleSubmitForm,
   handleGetFormSubmissions,
   handleParseFormSchema,
+  handleGetFormSubmissionCounts,
+  handleDownloadFormSubmissions,
 } from "./routes/forms";
 import {
   handleCreateCompany,
@@ -44,7 +46,11 @@ import {
   handleCheckIn,
 } from "./routes/staff";
 import { handleSendJobCompletionEmail } from "./routes/email";
-import { handleGenerateABSAPDF, handleViewFormPDF } from "./routes/pdf";
+import {
+  handleGenerateABSAPDF,
+  handleGenerateSAHLPDF,
+  handleViewFormPDF,
+} from "./routes/pdf";
 
 export function createServer() {
   const app = express();
@@ -89,6 +95,8 @@ export function createServer() {
   // Form submission routes
   app.post("/api/form-submissions", handleSubmitForm);
   app.get("/api/form-submissions", handleGetFormSubmissions);
+  app.get("/api/form-submissions/counts", handleGetFormSubmissionCounts);
+  app.get("/api/form-submissions/download", handleDownloadFormSubmissions);
 
   // Company routes
   app.post("/api/companies", handleCreateCompany);
@@ -110,6 +118,7 @@ export function createServer() {
 
   // PDF routes
   app.post("/api/pdf/absa", handleGenerateABSAPDF);
+  app.post("/api/pdf/sahl", handleGenerateSAHLPDF);
   app.post("/api/pdf/view", handleViewFormPDF);
 
   // Legacy demo route
