@@ -68,18 +68,24 @@ export function EnhancedCalendarGrid({
   const timeSlots = Array.from({ length: 19 }, (_, i) => i + 5); // 5 AM to 11 PM
 
   const getJobStatusColor = (job: Job) => {
+    // Handle cancelled jobs with red overlay
     if ((job.status as any) === "cancelled")
       return "bg-red-500/80 border-red-600";
 
+    // Use staff-specific colors for job identification
+    const staffColors = getStaffColorClasses(job.assignedTo);
+    const baseColor = staffColors.badge.replace("bg-", "");
+
+    // Apply opacity and status indicators
     switch (job.status) {
       case "completed":
-        return "bg-gradient-to-r from-purple-400 to-gray-400 border-purple-500";
+        return `bg-gradient-to-r from-${baseColor} to-gray-400 border-${baseColor.replace("-500", "-600")}`;
       case "in_progress":
-        return "bg-orange-500/80 border-orange-600";
+        return `${staffColors.badge}/80 border-${baseColor.replace("-500", "-600")}`;
       case "pending":
-        return "bg-blue-500/80 border-blue-600";
+        return `${staffColors.badge}/60 border-${baseColor.replace("-500", "-400")}`;
       default:
-        return "bg-gray-500/80 border-gray-600";
+        return `${staffColors.badge}/70 border-${baseColor.replace("-500", "-500")}`;
     }
   };
 
