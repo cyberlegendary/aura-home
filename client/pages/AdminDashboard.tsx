@@ -1524,6 +1524,7 @@ export default function AdminDashboard() {
         onOpenChange={setShowEnhancedShiftManagement}
         staff={staff}
         currentUser={user!}
+        hideDeleteButton={user?.role === "supervisor"}
         onShiftUpdate={(assignments) => {
           console.log("Shift assignments updated:", assignments);
           // In real implementation: save to backend
