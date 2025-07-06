@@ -21,6 +21,7 @@ import {
 import { JobActionButtons } from "./JobActionButtons";
 import { formatTravelTime } from "@/utils/locationUtils";
 import { getCalendarVisibleJobs } from "@/utils/jobVisibility";
+import { getStaffColorClasses, getStaffLegend } from "@/utils/staffColors";
 
 interface EnhancedCalendarGridProps {
   jobs: Job[];
