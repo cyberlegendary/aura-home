@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import multer from "multer";
 import { handleDemo } from "./routes/demo";
 import {
   handleLogin,
@@ -129,7 +130,11 @@ export function createServer() {
   app.post("/api/pdf/view", handleViewFormPDF);
 
   // PDF Template routes
-  app.post("/api/pdf-templates", handleCreatePDFTemplate);
+  app.post(
+    "/api/pdf-templates",
+    upload.single("templateFile"),
+    handleCreatePDFTemplate,
+  );
   app.get("/api/pdf-templates", handleGetPDFTemplates);
   app.put("/api/pdf-templates/:id", handleUpdatePDFTemplate);
   app.delete("/api/pdf-templates/:id", handleDeletePDFTemplate);
