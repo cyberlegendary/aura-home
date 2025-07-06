@@ -1561,6 +1561,33 @@ export default function AdminDashboard() {
           fetchData(); // Refresh data
         }}
       />
+
+      {/* PDF Template Manager Modal */}
+      <Dialog
+        open={showPDFTemplateManager}
+        onOpenChange={setShowPDFTemplateManager}
+      >
+        <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>PDF Template Management</DialogTitle>
+          </DialogHeader>
+          <PDFTemplateManager
+            forms={forms}
+            onTemplateCreated={() => {
+              // Refresh data if needed
+              fetchData();
+            }}
+            onTemplateUpdated={() => {
+              // Refresh data if needed
+              fetchData();
+            }}
+            onTemplateDeleted={() => {
+              // Refresh data if needed
+              fetchData();
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
