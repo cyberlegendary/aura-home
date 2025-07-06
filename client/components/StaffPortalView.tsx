@@ -433,9 +433,32 @@ export function StaffPortalView({
                                   </Badge>
                                 )}
                               </div>
-                              <Badge variant="outline" className="text-xs">
-                                View Only
-                              </Badge>
+                              <div className="flex items-center gap-2">
+                                {formSubmitted && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() =>
+                                      handleDownloadForm(
+                                        job.id,
+                                        jobForm.id,
+                                        jobForm.name,
+                                      )
+                                    }
+                                    disabled={downloadingForm === jobForm.id}
+                                  >
+                                    {downloadingForm === jobForm.id ? (
+                                      <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                                    ) : (
+                                      <Download className="h-3 w-3 mr-1" />
+                                    )}
+                                    Download
+                                  </Button>
+                                )}
+                                <Badge variant="outline" className="text-xs">
+                                  View Only
+                                </Badge>
+                              </div>
                             </div>
                           );
                         })}
