@@ -410,6 +410,21 @@ export function EnhancedCalendarGrid({
         </div>
       </div>
 
+      {/* Staff Legend */}
+      {staff && staff.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 p-3 bg-gray-50 rounded-lg">
+          <span className="text-sm font-medium text-gray-700 mr-2">Staff:</span>
+          {getStaffLegend(staff).map((staffMember) => (
+            <div key={staffMember.id} className="flex items-center gap-1">
+              <div
+                className={`w-3 h-3 rounded-full ${staffMember.color.accent}`}
+              ></div>
+              <span className="text-xs text-gray-600">{staffMember.name}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Calendar Content */}
       <Card>
         <CardContent className="p-0 overflow-hidden">
