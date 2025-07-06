@@ -32,6 +32,7 @@ import {
 import { User as UserType, Job, Form, FormSubmission } from "@shared/types";
 import { StaffImpersonationModal } from "./StaffImpersonationModal";
 import { AdvancedStaffCalendarView } from "./AdvancedStaffCalendarView";
+import { CreateJobModal } from "./CreateJobModal";
 
 interface StaffManagementDashboardProps {
   currentUser: UserType;
