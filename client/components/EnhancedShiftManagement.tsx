@@ -58,6 +58,7 @@ interface EnhancedShiftManagementProps {
   onShiftCreated?: (shift: Shift) => void;
   onShiftUpdated?: (shift: Shift) => void;
   onShiftDeleted?: (shiftId: string) => void;
+  hideDeleteButton?: boolean;
 }
 
 export function EnhancedShiftManagement({
@@ -65,6 +66,7 @@ export function EnhancedShiftManagement({
   onShiftCreated,
   onShiftUpdated,
   onShiftDeleted,
+  hideDeleteButton = false,
 }: EnhancedShiftManagementProps) {
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
