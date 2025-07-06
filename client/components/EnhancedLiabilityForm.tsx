@@ -50,12 +50,14 @@ interface LiabilityFormData {
 }
 
 interface EnhancedLiabilityFormProps {
+  job?: any; // Job data for context
   onSubmit: (formData: LiabilityFormData) => void;
   existingData?: LiabilityFormData;
   isSubmitting?: boolean;
 }
 
 export function EnhancedLiabilityForm({
+  job,
   onSubmit,
   existingData,
   isSubmitting = false,
