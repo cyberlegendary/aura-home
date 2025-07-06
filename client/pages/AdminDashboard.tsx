@@ -103,6 +103,9 @@ export default function AdminDashboard() {
     time: string;
     date: Date;
   } | null>(null);
+  const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
+  const [isSettingsSpinning, setIsSettingsSpinning] = useState(false);
+  const [activeTab, setActiveTab] = useState("");
 
   useEffect(() => {
     if (user && (user.role === "admin" || user.role === "supervisor")) {
