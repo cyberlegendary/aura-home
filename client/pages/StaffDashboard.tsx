@@ -106,7 +106,15 @@ export default function StaffDashboard() {
     if (!job) return [];
 
     const formIds = job.formIds || (job.formId ? [job.formId] : []);
-    return forms.filter((f) => formIds.includes(f.id));
+    const assignedForms = forms.filter((f) => formIds.includes(f.id));
+
+    // Add optional forms as "destiny forms" for staff
+    const optionalFormIds = ["form-material-list", "form-noncompliance"];
+    const destinyForms = forms.filter(
+      (f) => optionalFormIds.includes(f.id) && !formIds.includes(f.id),
+    );
+
+    return [...assignedForms, ...destinyForms];
   };
 
   const getJobForm = (jobId: string) => {
