@@ -11,6 +11,8 @@ import {
   StickyNote,
   User,
   ArrowLeft,
+  Download,
+  Loader2,
 } from "lucide-react";
 import { Job, Form, FormSubmission, User as UserType } from "@shared/types";
 
