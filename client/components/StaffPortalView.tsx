@@ -31,6 +31,7 @@ export function StaffPortalView({
   const [forms, setForms] = useState<Form[]>([]);
   const [submissions, setSubmissions] = useState<FormSubmission[]>([]);
   const [loading, setLoading] = useState(true);
+  const [downloadingForm, setDownloadingForm] = useState<string | null>(null);
 
   useEffect(() => {
     fetchStaffData();
