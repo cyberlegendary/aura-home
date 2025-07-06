@@ -395,6 +395,24 @@ export default function AdminDashboard() {
     );
   }
 
+  // Show staff portal view if selected
+  if (showStaffPortal && selectedStaffPortal && user) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <StaffPortalView
+            staff={selectedStaffPortal}
+            onBack={() => {
+              setShowStaffPortal(false);
+              setSelectedStaffPortal(null);
+            }}
+            currentUser={user}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
