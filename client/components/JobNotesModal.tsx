@@ -89,7 +89,7 @@ export function JobNotesModal({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          note: newNote.trim(),
+          content: newNote.trim(),
         }),
       });
 
