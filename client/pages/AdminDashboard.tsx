@@ -259,9 +259,16 @@ export default function AdminDashboard() {
     console.log("Extending job", jobId, "by", duration, "minutes");
   };
 
-  const handleUserClick = (user: UserType) => {
-    setSelectedUser(user);
-    setShowUserManagement(true);
+  const handleUserClick = (selectedUser: UserType) => {
+    if (user && (user.role === "admin" || user.role === "supervisor")) {
+      // For admins and apollos, show staff portal view
+      setSelectedStaffPortal(selectedUser);
+      setShowStaffPortal(true);
+    } else {
+      // For other users, show profile modal
+      setSelectedUser(selectedUser);
+      setShowUserManagement(true);
+    }
   };
 
   const handleJobEdit = (job: Job) => {
