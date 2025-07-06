@@ -111,6 +111,7 @@ export default function AdminDashboard() {
   const [selectedStaffPortal, setSelectedStaffPortal] =
     useState<UserType | null>(null);
   const [showStaffPortal, setShowStaffPortal] = useState(false);
+  const [showPDFTemplateManager, setShowPDFTemplateManager] = useState(false);
 
   useEffect(() => {
     if (user && (user.role === "admin" || user.role === "supervisor")) {
