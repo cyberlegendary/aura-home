@@ -144,9 +144,22 @@ export const handleDownloadFilledForm: RequestHandler = async (req, res) => {
         .json({ error: "No PDF template found for this form" });
     }
 
-    // Get form submission data (this would come from the database in production)
-    const { formSubmissions } = await import("./forms");
-    const submission = formSubmissions.find(
+    // Get form submission data (mock implementation)
+    // In production, this would come from a database
+    const mockSubmissions = [
+      {
+        id: "sub-1",
+        jobId: jobId as string,
+        formId: formId as string,
+        data: {
+          "field-1": "Sample Value",
+          "field-2": "Another Value",
+        },
+        submittedAt: new Date().toISOString(),
+      },
+    ];
+
+    const submission = mockSubmissions.find(
       (s) => s.jobId === jobId && s.formId === formId,
     );
 
