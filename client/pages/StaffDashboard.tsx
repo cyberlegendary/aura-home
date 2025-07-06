@@ -106,7 +106,15 @@ export default function StaffDashboard() {
     if (!job) return [];
 
     const formIds = job.formIds || (job.formId ? [job.formId] : []);
-    return forms.filter((f) => formIds.includes(f.id));
+    const assignedForms = forms.filter((f) => formIds.includes(f.id));
+
+    // Add optional forms as "destiny forms" for staff
+    const optionalFormIds = ["form-material-list", "form-noncompliance"];
+    const destinyForms = forms.filter(
+      (f) => optionalFormIds.includes(f.id) && !formIds.includes(f.id),
+    );
+
+    return [...assignedForms, ...destinyForms];
   };
 
   const getJobForm = (jobId: string) => {
@@ -500,53 +508,86 @@ export default function StaffDashboard() {
                           </div>
                         </div>
 
-                        {/* Form Section */}
-                        {form && (
+                        {/* Forms Section */}
+                        {getJobForms(job.id).length > 0 && (
                           <div className="border-t pt-4">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center space-x-2">
-                                <FileText className="h-4 w-4 text-gray-600" />
-                                <span className="font-medium">
-                                  Required Form: {form.name}
-                                </span>
-                                {hasSubmittedForm ? (
-                                  <Badge
-                                    variant="secondary"
-                                    className="bg-green-100 text-green-800"
+                            <h4 className="font-medium mb-3">
+                              Available Forms
+                            </h4>
+                            <div className="space-y-2">
+                              {getJobForms(job.id).map((jobForm) => {
+                                const formSubmitted = submissions.some(
+                                  (s) =>
+                                    s.jobId === job.id &&
+                                    s.formId === jobForm.id,
+                                );
+                                const isDestinyForm = [
+                                  "form-material-list",
+                                  "form-noncompliance",
+                                ].includes(jobForm.id);
+                                const formLabel = isDestinyForm
+                                  ? "Destiny Form"
+                                  : job.formIds?.includes(jobForm.id) ||
+                                      job.formId === jobForm.id
+                                    ? "Required Form"
+                                    : "Optional Form";
+
+                                return (
+                                  <div
+                                    key={jobForm.id}
+                                    className="flex items-center justify-between p-3 border rounded-lg"
                                   >
-                                    <CheckCircle className="h-3 w-3 mr-1" />
-                                    Submitted
-                                  </Badge>
-                                ) : (
-                                  <Badge
-                                    variant="secondary"
-                                    className="bg-red-100 text-red-800"
-                                  >
-                                    <AlertCircle className="h-3 w-3 mr-1" />
-                                    Pending
-                                  </Badge>
-                                )}
-                              </div>
-                              <Button
-                                size="sm"
-                                variant={
-                                  hasSubmittedForm ? "outline" : "default"
-                                }
-                                onClick={() => {
-                                  if (form) {
-                                    // Navigate to fill form page
-                                    window.location.href = `/fill-form?jobId=${job.id}&formId=${form.id}`;
-                                  }
-                                }}
-                              >
-                                {hasSubmittedForm ? "View Form" : "Fill Form"}
-                              </Button>
+                                    <div className="flex items-center space-x-2">
+                                      <FileText className="h-4 w-4 text-gray-600" />
+                                      <span className="font-medium">
+                                        {jobForm.name}
+                                      </span>
+                                      <Badge
+                                        variant="outline"
+                                        className={
+                                          isDestinyForm
+                                            ? "border-purple-300 text-purple-800"
+                                            : ""
+                                        }
+                                      >
+                                        {formLabel}
+                                      </Badge>
+                                      {formSubmitted ? (
+                                        <Badge
+                                          variant="secondary"
+                                          className="bg-green-100 text-green-800"
+                                        >
+                                          <CheckCircle className="h-3 w-3 mr-1" />
+                                          Submitted
+                                        </Badge>
+                                      ) : (
+                                        <Badge
+                                          variant="secondary"
+                                          className="bg-yellow-100 text-yellow-800"
+                                        >
+                                          <AlertCircle className="h-3 w-3 mr-1" />
+                                          Available
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    <Button
+                                      size="sm"
+                                      variant={
+                                        formSubmitted ? "outline" : "default"
+                                      }
+                                      onClick={() => {
+                                        // Navigate to fill form page
+                                        window.location.href = `/fill-form?jobId=${job.id}&formId=${jobForm.id}`;
+                                      }}
+                                    >
+                                      {formSubmitted
+                                        ? "View Form"
+                                        : "Fill Form"}
+                                    </Button>
+                                  </div>
+                                );
+                              })}
                             </div>
-                            {form.description && (
-                              <p className="text-sm text-gray-600 mt-2">
-                                {form.description}
-                              </p>
-                            )}
                           </div>
                         )}
 

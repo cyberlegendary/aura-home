@@ -123,7 +123,7 @@ export function JobDetailsModal({
         method: "POST",
         headers,
         body: JSON.stringify({
-          note: `TIME EXTENSION: Added ${extensionHours} hours by ${user?.username} (${user?.role})`,
+          content: `TIME EXTENSION: Added ${extensionHours} hours by ${user?.username} (${user?.role})`,
           isTimeExtension: true,
         }),
       });

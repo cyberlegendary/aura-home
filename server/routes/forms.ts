@@ -299,3 +299,92 @@ export const handleParseFormSchema: RequestHandler = (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+export const handleGetFormSubmissionCounts: RequestHandler = (req, res) => {
+  try {
+    const { jobId } = req.query;
+
+    let relevantSubmissions = formSubmissions;
+
+    if (jobId) {
+      relevantSubmissions = relevantSubmissions.filter(
+        (sub) => sub.jobId === jobId,
+      );
+    }
+
+    // Count submissions by form ID
+    const counts: Record<string, number> = {};
+    relevantSubmissions.forEach((submission) => {
+      counts[submission.formId] = (counts[submission.formId] || 0) + 1;
+    });
+
+    res.json(counts);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const handleDownloadFormSubmissions: RequestHandler = async (
+  req,
+  res,
+) => {
+  try {
+    const { formId, jobId } = req.query;
+
+    if (!formId) {
+      return res.status(400).json({ error: "Form ID is required" });
+    }
+
+    // Get form submissions
+    let submissions = formSubmissions.filter((sub) => sub.formId === formId);
+
+    if (jobId) {
+      submissions = submissions.filter((sub) => sub.jobId === jobId);
+    }
+
+    if (submissions.length === 0) {
+      return res.status(404).json({ error: "No submissions found" });
+    }
+
+    // Get form details
+    const form = forms.find((f) => f.id === formId);
+    if (!form) {
+      return res.status(404).json({ error: "Form not found" });
+    }
+
+    // Determine form type for PDF generation
+    let formType = "generic";
+    if (form.name.toLowerCase().includes("absa")) {
+      formType = "absa";
+    } else if (form.name.toLowerCase().includes("sahl")) {
+      formType = "sahl";
+    }
+
+    // For now, download the latest submission
+    const latestSubmission = submissions[submissions.length - 1];
+
+    if (formType === "absa" || formType === "sahl") {
+      // Generate PDF using existing PDF generation logic
+      req.body = latestSubmission.data;
+
+      if (formType === "absa") {
+        const { handleGenerateABSAPDF } = await import("./pdf");
+        return handleGenerateABSAPDF(req, res);
+      } else if (formType === "sahl") {
+        const { handleGenerateSAHLPDF } = await import("./pdf");
+        return handleGenerateSAHLPDF(req, res);
+      }
+    } else {
+      // For other forms, return JSON data
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${form.name}_submissions.json"`,
+      );
+      res.json(submissions);
+    }
+  } catch (error) {
+    console.error("Download form submissions error:", error);
+    res.status(500).json({ error: "Failed to download form submissions" });
+  }
+};

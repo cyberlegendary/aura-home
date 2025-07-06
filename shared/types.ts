@@ -84,6 +84,9 @@ export interface Job {
   status: "pending" | "in_progress" | "completed";
   priority: "low" | "medium" | "high";
   dueDate?: string;
+  duration?: number; // Duration in minutes
+  endTime?: string; // Calculated end time
+  startTime?: string; // Start time for display
   carryOver?: boolean;
   notes?: string;
   category?:

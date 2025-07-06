@@ -32,6 +32,7 @@ import {
 import { User as UserType, Job, Form, FormSubmission } from "@shared/types";
 import { StaffImpersonationModal } from "./StaffImpersonationModal";
 import { AdvancedStaffCalendarView } from "./AdvancedStaffCalendarView";
+import { CreateJobModal } from "./CreateJobModal";
 
 interface StaffManagementDashboardProps {
   currentUser: UserType;
@@ -47,6 +48,9 @@ export function StaffManagementDashboard({
   const [selectedStaff, setSelectedStaff] = useState<UserType | null>(null);
   const [showImpersonation, setShowImpersonation] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showJobCreation, setShowJobCreation] = useState(false);
+  const [selectedStaffForJob, setSelectedStaffForJob] =
+    useState<UserType | null>(null);
   const [locationFilter, setLocationFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedStaffForCalendar, setSelectedStaffForCalendar] =
@@ -164,6 +168,38 @@ export function StaffManagementDashboard({
   const handleStaffClick = (staffMember: UserType) => {
     setSelectedStaff(staffMember);
     setShowImpersonation(true);
+  };
+
+  const handleCreateJobForStaff = (staffMember: UserType) => {
+    setSelectedStaffForJob(staffMember);
+    setShowJobCreation(true);
+  };
+
+  const createJobForStaff = async (jobData: any) => {
+    try {
+      const token = localStorage.getItem("auth_token");
+      const headers = {
+        "Content-Type": "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }),
+      };
+
+      const response = await fetch("/api/jobs", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          ...jobData,
+          assignedTo: selectedStaffForJob?.id,
+        }),
+      });
+
+      if (response.ok) {
+        await fetchAllData(); // Refresh data
+        setShowJobCreation(false);
+        setSelectedStaffForJob(null);
+      }
+    } catch (error) {
+      console.error("Error creating job:", error);
+    }
   };
 
   const formatLocation = (location: UserType["location"]) => {
@@ -332,10 +368,31 @@ export function StaffManagementDashboard({
                             <FileText className="h-3 w-3" />
                             {stats.totalSubmissions} forms
                           </div>
-                          <Button size="sm" variant="outline">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleStaffClick(staffMember);
+                            }}
+                          >
                             <Eye className="h-3 w-3 mr-1" />
                             View Details
                           </Button>
+                          {(currentUser.role === "admin" ||
+                            currentUser.role === "supervisor") && (
+                            <Button
+                              size="sm"
+                              variant="default"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCreateJobForStaff(staffMember);
+                              }}
+                            >
+                              <Plus className="h-3 w-3 mr-1" />
+                              Add Job
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </CardContent>
@@ -466,6 +523,26 @@ export function StaffManagementDashboard({
           currentUser={currentUser}
         />
       )}
+
+      {/* Job Creation Modal */}
+      <CreateJobModal
+        open={showJobCreation}
+        onOpenChange={setShowJobCreation}
+        onJobCreated={() => {
+          fetchAllData();
+          setShowJobCreation(false);
+          setSelectedStaffForJob(null);
+        }}
+        selectedJobTime={
+          selectedStaffForJob
+            ? {
+                time: "09:00",
+                date: new Date(),
+                staffId: selectedStaffForJob.id,
+              }
+            : null
+        }
+      />
     </div>
   );
 }

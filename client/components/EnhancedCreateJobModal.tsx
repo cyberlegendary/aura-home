@@ -28,9 +28,15 @@ import {
   Clock,
   Calendar,
   AlertTriangle,
+  MapPin,
+  Users,
 } from "lucide-react";
 import { parseJobText, type ParsedJobData } from "@/utils/textParser";
 import { useAuth } from "@/contexts/AuthContext";
+import {
+  getSmartJobSuggestions,
+  type JobSuggestion,
+} from "@/utils/smartJobAssignment";
 
 interface EnhancedCreateJobModalProps {
   open: boolean;
@@ -77,6 +83,7 @@ export function EnhancedCreateJobModal({
   const [rawText, setRawText] = useState("");
   const [parseLoading, setParseLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("manual");
+  const [smartSuggestions, setSmartSuggestions] = useState<JobSuggestion[]>([]);
 
   const isAdmin = user?.role === "admin";
   const isSupervisor = user?.role === "supervisor";
@@ -128,6 +135,13 @@ export function EnhancedCreateJobModal({
       checkForDuplicates();
     }
   }, [jobData.assignedTo, jobData.dueDate, timeDetails.time]);
+
+  useEffect(() => {
+    // Calculate smart suggestions when parsed data has location
+    if (parsedData?.riskAddress && staff.length > 0) {
+      calculateSmartSuggestions();
+    }
+  }, [parsedData?.riskAddress, staff]);
 
   const fetchData = async () => {
     try {
@@ -183,6 +197,43 @@ export function EnhancedCreateJobModal({
       }
     } catch (error) {
       console.error("Error checking duplicates:", error);
+    }
+  };
+
+  const calculateSmartSuggestions = async () => {
+    if (!parsedData?.riskAddress) return;
+
+    try {
+      // Convert address to coordinates (in a real app, use geocoding service)
+      // For now, use mock coordinates based on city
+      let coordinates = { lat: -26.1076, lng: 28.0567 }; // Default Johannesburg
+
+      if (
+        parsedData.riskAddress.toLowerCase().includes("cape town") ||
+        parsedData.riskAddress.toLowerCase().includes("cape") ||
+        parsedData.riskAddress.toLowerCase().includes("western cape")
+      ) {
+        coordinates = { lat: -33.8903, lng: 18.4979 }; // Cape Town
+      }
+
+      // Fetch current jobs for workload calculation
+      const token = localStorage.getItem("auth_token");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const jobsResponse = await fetch("/api/jobs", { headers });
+      const allJobs = jobsResponse.ok ? await jobsResponse.json() : [];
+
+      const suggestions = getSmartJobSuggestions(coordinates, staff, allJobs);
+      setSmartSuggestions(suggestions.slice(0, 3)); // Show top 3 suggestions
+
+      // Auto-assign best suggestion if no staff is selected
+      if (!jobData.assignedTo && suggestions.length > 0) {
+        setJobData((prev) => ({
+          ...prev,
+          assignedTo: suggestions[0].staffMember.id,
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to calculate smart suggestions:", error);
     }
   };
 
@@ -383,7 +434,15 @@ export function EnhancedCreateJobModal({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="assignedTo">Assign to Staff</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="assignedTo">Assign to Staff</Label>
+                {smartSuggestions.length > 0 && (
+                  <Badge variant="outline" className="text-xs">
+                    <MapPin className="h-3 w-3 mr-1" />
+                    Smart Suggestions
+                  </Badge>
+                )}
+              </div>
               <Select
                 value={jobData.assignedTo}
                 onValueChange={(value) =>
@@ -404,6 +463,59 @@ export function EnhancedCreateJobModal({
                   ))}
                 </SelectContent>
               </Select>
+
+              {/* Smart Suggestions Display */}
+              {smartSuggestions.length > 0 && (
+                <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Users className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-medium text-blue-800">
+                      Recommended Staff (by proximity & availability)
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {smartSuggestions.map((suggestion, index) => (
+                      <div
+                        key={suggestion.staffMember.id}
+                        className={`flex items-center justify-between p-2 rounded cursor-pointer transition-colors ${
+                          jobData.assignedTo === suggestion.staffMember.id
+                            ? "bg-blue-100 border border-blue-300"
+                            : "bg-white hover:bg-blue-50"
+                        }`}
+                        onClick={() =>
+                          setJobData((prev) => ({
+                            ...prev,
+                            assignedTo: suggestion.staffMember.id,
+                          }))
+                        }
+                      >
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">
+                              {index === 0 && "🥇"}{" "}
+                              {suggestion.staffMember.name}
+                            </span>
+                            <Badge
+                              variant={index === 0 ? "default" : "secondary"}
+                              className="text-xs"
+                            >
+                              {suggestion.distance.toFixed(1)}km
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {suggestion.reason}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xs text-muted-foreground">
+                            {suggestion.travelTime.toFixed(0)}min travel
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

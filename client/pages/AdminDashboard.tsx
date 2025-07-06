@@ -3,6 +3,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Users,
@@ -19,6 +25,7 @@ import {
   Package,
   AlertCircle,
   Shield,
+  ChevronDown,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -47,6 +54,10 @@ import { NoncomplianceForm } from "@/components/NoncomplianceForm";
 import { EnhancedLiabilityForm } from "@/components/EnhancedLiabilityForm";
 import { EnhancedShiftManagement } from "@/components/EnhancedShiftManagement";
 import { ClientManagement } from "@/components/ClientManagement";
+import { FormSubmissionList } from "@/components/FormSubmissionCounter";
+import { getCalendarVisibleJobs } from "@/utils/jobVisibility";
+import { StaffPortalView } from "@/components/StaffPortalView";
+import { PDFTemplateManager } from "@/components/PDFTemplateManager";
 import { CompanyManagementModal } from "@/components/CompanyManagementModal";
 import { FormEditModal } from "@/components/FormEditModal";
 import { PDFFormGenerator } from "@/components/PDFFormGenerator";
@@ -100,12 +111,34 @@ export default function AdminDashboard() {
     time: string;
     date: Date;
   } | null>(null);
+  const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
+  const [isSettingsSpinning, setIsSettingsSpinning] = useState(false);
+  const [activeTab, setActiveTab] = useState("");
+  const [selectedStaffPortal, setSelectedStaffPortal] =
+    useState<UserType | null>(null);
+  const [showStaffPortal, setShowStaffPortal] = useState(false);
+  const [showPDFTemplateManager, setShowPDFTemplateManager] = useState(false);
 
   useEffect(() => {
     if (user && (user.role === "admin" || user.role === "supervisor")) {
       fetchData();
+      // Set default tab to analytics for admins and apollos
+      if (!activeTab) {
+        setActiveTab("analytics");
+      }
     } else {
       setLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    // Initialize default tab for apollos and admins
+    if (
+      user &&
+      (user.role === "admin" || user.role === "supervisor") &&
+      !activeTab
+    ) {
+      setActiveTab("analytics");
     }
   }, [user]);
 
@@ -138,12 +171,15 @@ export default function AdminDashboard() {
     }
   };
 
-  // Filter jobs based on search term
+  // Filter jobs based on user permissions and search term
   const filteredJobs = React.useMemo(() => {
-    if (!searchTerm.trim()) return jobs;
+    // First apply user-based filtering
+    const visibleJobs = user ? getCalendarVisibleJobs(jobs, user) : jobs;
+
+    if (!searchTerm.trim()) return visibleJobs;
 
     const term = searchTerm.toLowerCase();
-    return jobs.filter(
+    return visibleJobs.filter(
       (job) =>
         job.title.toLowerCase().includes(term) ||
         job.description.toLowerCase().includes(term) ||
@@ -152,7 +188,7 @@ export default function AdminDashboard() {
         (job.policyNo && job.policyNo.toLowerCase().includes(term)) ||
         (job.riskAddress && job.riskAddress.toLowerCase().includes(term)),
     );
-  }, [jobs, searchTerm]);
+  }, [jobs, searchTerm, user]);
 
   const stats = {
     totalJobs: jobs.length,
@@ -231,14 +267,34 @@ export default function AdminDashboard() {
     console.log("Extending job", jobId, "by", duration, "minutes");
   };
 
-  const handleUserClick = (user: UserType) => {
-    setSelectedUser(user);
-    setShowUserManagement(true);
+  const handleUserClick = (selectedUser: UserType) => {
+    if (user && (user.role === "admin" || user.role === "supervisor")) {
+      // For admins and apollos, show staff portal view
+      setSelectedStaffPortal(selectedUser);
+      setShowStaffPortal(true);
+    } else {
+      // For other users, show profile modal
+      setSelectedUser(selectedUser);
+      setShowUserManagement(true);
+    }
   };
 
   const handleJobEdit = (job: Job) => {
     setSelectedJob(job);
     setShowJobEdit(true);
+  };
+
+  const handleSettingsClick = () => {
+    setIsSettingsSpinning(true);
+    setTimeout(() => {
+      setShowSettingsDropdown(!showSettingsDropdown);
+      setIsSettingsSpinning(false);
+    }, 300);
+  };
+
+  const handleTabSelect = (tabValue: string) => {
+    setActiveTab(tabValue);
+    setShowSettingsDropdown(false);
   };
 
   const handleCreateJobWithTime = (
@@ -342,6 +398,24 @@ export default function AdminDashboard() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-2 text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show staff portal view if selected
+  if (showStaffPortal && selectedStaffPortal && user) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <StaffPortalView
+            staff={selectedStaffPortal}
+            onBack={() => {
+              setShowStaffPortal(false);
+              setSelectedStaffPortal(null);
+            }}
+            currentUser={user}
+          />
         </div>
       </div>
     );
@@ -494,21 +568,110 @@ export default function AdminDashboard() {
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="jobs" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-12">
-            <TabsTrigger value="jobs">Jobs</TabsTrigger>
-            <TabsTrigger value="calendar">Calendar</TabsTrigger>
-            <TabsTrigger value="schedule">Schedule</TabsTrigger>
-            <TabsTrigger value="salary">Salary</TabsTrigger>
-            <TabsTrigger value="materials">Materials</TabsTrigger>
-            <TabsTrigger value="clients">Clients</TabsTrigger>
-            <TabsTrigger value="forms">Forms</TabsTrigger>
-            <TabsTrigger value="staff">Staff</TabsTrigger>
-            <TabsTrigger value="staff-mgmt">Staff Mgmt</TabsTrigger>
-            <TabsTrigger value="companies">Companies</TabsTrigger>
-            <TabsTrigger value="actuarial">Actuarial</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          </TabsList>
+        <Tabs
+          value={activeTab || "analytics"}
+          onValueChange={setActiveTab}
+          className="space-y-6"
+        >
+          <div className="flex items-center justify-between">
+            {user?.role === "supervisor" ? (
+              // Apollo view - Only main tabs + settings dropdown
+              <div className="flex items-center gap-2 w-full">
+                <TabsList className="flex-1">
+                  <TabsTrigger value="jobs">Jobs</TabsTrigger>
+                  <TabsTrigger value="schedule">Schedule</TabsTrigger>
+                  <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                </TabsList>
+                <div className="relative">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleSettingsClick}
+                    className="ml-2"
+                  >
+                    <Settings
+                      className={`h-4 w-4 transition-transform duration-300 ${
+                        isSettingsSpinning ? "animate-spin" : ""
+                      }`}
+                    />
+                    <ChevronDown className="h-3 w-3 ml-1" />
+                  </Button>
+                  {showSettingsDropdown && (
+                    <div className="absolute top-full right-0 mt-1 w-48 bg-white border rounded-lg shadow-lg z-50">
+                      <div className="py-1">
+                        <button
+                          onClick={() => handleTabSelect("calendar")}
+                          className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                        >
+                          Calendar
+                        </button>
+                        <button
+                          onClick={() => handleTabSelect("salary")}
+                          className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                        >
+                          Salary
+                        </button>
+                        <button
+                          onClick={() => handleTabSelect("materials")}
+                          className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                        >
+                          Materials
+                        </button>
+                        <button
+                          onClick={() => handleTabSelect("clients")}
+                          className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                        >
+                          Clients
+                        </button>
+                        <button
+                          onClick={() => handleTabSelect("forms")}
+                          className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                        >
+                          Forms
+                        </button>
+                        <button
+                          onClick={() => handleTabSelect("staff")}
+                          className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                        >
+                          Staff
+                        </button>
+                        <button
+                          onClick={() => handleTabSelect("staff-mgmt")}
+                          className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                        >
+                          Staff Mgmt
+                        </button>
+                        <button
+                          onClick={() => handleTabSelect("actuarial")}
+                          className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+                        >
+                          Actuarial
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              // Admin view - All tabs visible
+              <TabsList className="grid w-full grid-cols-12">
+                <TabsTrigger value="jobs">Jobs</TabsTrigger>
+                <TabsTrigger value="calendar">Calendar</TabsTrigger>
+                <TabsTrigger value="schedule">Schedule</TabsTrigger>
+                <TabsTrigger value="salary">Salary</TabsTrigger>
+                <TabsTrigger value="materials">Materials</TabsTrigger>
+                <TabsTrigger value="clients">Clients</TabsTrigger>
+                <TabsTrigger value="forms">Forms</TabsTrigger>
+                <TabsTrigger value="staff">Staff</TabsTrigger>
+                <TabsTrigger value="staff-mgmt">Staff Mgmt</TabsTrigger>
+                {user?.role === "admin" && (
+                  <TabsTrigger value="companies">Companies</TabsTrigger>
+                )}
+                <TabsTrigger value="actuarial">Actuarial</TabsTrigger>
+                <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              </TabsList>
+            )}
+          </div>
 
           {/* Jobs Tab */}
           <TabsContent value="jobs">
@@ -752,6 +915,16 @@ export default function AdminDashboard() {
                 <div className="flex justify-between items-center">
                   <CardTitle>Form Management</CardTitle>
                   <div className="space-x-2">
+                    {user?.role === "admin" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setShowPDFTemplateManager(true)}
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        PDF Templates
+                      </Button>
+                    )}
                     <Button size="sm" onClick={() => setShowCreateForm(true)}>
                       <Plus className="h-4 w-4 mr-2" />
                       Create Form
@@ -907,43 +1080,54 @@ export default function AdminDashboard() {
                       <FileText className="h-5 w-5 mr-2 text-gray-600" />
                       Standard Forms
                     </h3>
-                    <div className="space-y-4">
-                      {forms.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
-                          No forms found. Create your first form to get started.
-                        </div>
-                      ) : (
-                        forms.map((form) => (
-                          <div
-                            key={form.id}
-                            className="border rounded-lg p-4 space-y-2 cursor-pointer hover:bg-gray-50 transition-colors"
-                            onClick={() => handleFormEdit(form)}
-                            title="Click to view and edit form details"
-                          >
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h3 className="font-medium">{form.name}</h3>
-                                <p className="text-sm text-gray-600">
-                                  {form.description}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                  {form.fields.length} fields
-                                </p>
-                              </div>
-                              <div className="flex space-x-2">
-                                {form.isTemplate && (
-                                  <Badge variant="secondary">Template</Badge>
-                                )}
-                                <Badge variant="outline">
-                                  {form.restrictedToCompanies?.length === 0
-                                    ? "All Companies"
-                                    : `${form.restrictedToCompanies?.length || 0} Companies`}
-                                </Badge>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                      <div className="lg:col-span-2 space-y-4">
+                        {forms.length === 0 ? (
+                          <div className="text-center py-8 text-gray-500">
+                            No forms found. Create your first form to get
+                            started.
+                          </div>
+                        ) : (
+                          forms.map((form) => (
+                            <div
+                              key={form.id}
+                              className="border rounded-lg p-4 space-y-2 cursor-pointer hover:bg-gray-50 transition-colors"
+                              onClick={() => handleFormEdit(form)}
+                              title="Click to view and edit form details"
+                            >
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h3 className="font-medium">{form.name}</h3>
+                                  <p className="text-sm text-gray-600">
+                                    {form.description}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    {form.fields.length} fields
+                                  </p>
+                                </div>
+                                <div className="flex space-x-2">
+                                  {form.isTemplate && (
+                                    <Badge variant="secondary">Template</Badge>
+                                  )}
+                                  <Badge variant="outline">
+                                    {form.restrictedToCompanies?.length === 0
+                                      ? "All Companies"
+                                      : `${form.restrictedToCompanies?.length || 0} Companies`}
+                                  </Badge>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))
-                      )}
+                          ))
+                        )}
+                      </div>
+
+                      {/* Form Submission Summary */}
+                      <div>
+                        <FormSubmissionList
+                          forms={forms}
+                          className="sticky top-4"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1223,7 +1407,21 @@ export default function AdminDashboard() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics">
-            <AnalyticsDashboard jobs={jobs} staff={staff} />
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-2xl font-bold">Analytics Dashboard</h2>
+                  <p className="text-gray-600">
+                    Overview of system performance and metrics
+                  </p>
+                </div>
+                <Button onClick={() => setShowCreateJob(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Quick Create Job
+                </Button>
+              </div>
+              <AnalyticsDashboard jobs={jobs} staff={staff} />
+            </div>
           </TabsContent>
         </Tabs>
       </div>
@@ -1362,12 +1560,40 @@ export default function AdminDashboard() {
         onOpenChange={setShowEnhancedShiftManagement}
         staff={staff}
         currentUser={user!}
+        hideDeleteButton={user?.role === "supervisor"}
         onShiftUpdate={(assignments) => {
           console.log("Shift assignments updated:", assignments);
           // In real implementation: save to backend
           fetchData(); // Refresh data
         }}
       />
+
+      {/* PDF Template Manager Modal */}
+      <Dialog
+        open={showPDFTemplateManager}
+        onOpenChange={setShowPDFTemplateManager}
+      >
+        <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>PDF Template Management</DialogTitle>
+          </DialogHeader>
+          <PDFTemplateManager
+            forms={forms}
+            onTemplateCreated={() => {
+              // Refresh data if needed
+              fetchData();
+            }}
+            onTemplateUpdated={() => {
+              // Refresh data if needed
+              fetchData();
+            }}
+            onTemplateDeleted={() => {
+              // Refresh data if needed
+              fetchData();
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

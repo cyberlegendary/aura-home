@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import multer from "multer";
 import { handleDemo } from "./routes/demo";
 import {
   handleLogin,
@@ -27,6 +28,8 @@ import {
   handleSubmitForm,
   handleGetFormSubmissions,
   handleParseFormSchema,
+  handleGetFormSubmissionCounts,
+  handleDownloadFormSubmissions,
 } from "./routes/forms";
 import {
   handleCreateCompany,
@@ -44,10 +47,27 @@ import {
   handleCheckIn,
 } from "./routes/staff";
 import { handleSendJobCompletionEmail } from "./routes/email";
-import { handleGenerateABSAPDF, handleViewFormPDF } from "./routes/pdf";
+import {
+  handleGenerateABSAPDF,
+  handleGenerateSAHLPDF,
+  handleViewFormPDF,
+} from "./routes/pdf";
+import {
+  handleCreatePDFTemplate,
+  handleGetPDFTemplates,
+  handleUpdatePDFTemplate,
+  handleDeletePDFTemplate,
+  handleDownloadFilledForm,
+} from "./routes/pdfTemplates";
 
 export function createServer() {
   const app = express();
+
+  // Configure multer for file uploads
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  });
 
   // Middleware
   app.use(cors());
@@ -89,6 +109,8 @@ export function createServer() {
   // Form submission routes
   app.post("/api/form-submissions", handleSubmitForm);
   app.get("/api/form-submissions", handleGetFormSubmissions);
+  app.get("/api/form-submissions/counts", handleGetFormSubmissionCounts);
+  app.get("/api/form-submissions/download", handleDownloadFormSubmissions);
 
   // Company routes
   app.post("/api/companies", handleCreateCompany);
@@ -110,7 +132,21 @@ export function createServer() {
 
   // PDF routes
   app.post("/api/pdf/absa", handleGenerateABSAPDF);
+  app.post("/api/pdf/sahl", handleGenerateSAHLPDF);
   app.post("/api/pdf/view", handleViewFormPDF);
+
+  // PDF Template routes
+  app.post(
+    "/api/pdf-templates",
+    upload.single("templateFile"),
+    handleCreatePDFTemplate,
+  );
+  app.get("/api/pdf-templates", handleGetPDFTemplates);
+  app.put("/api/pdf-templates/:id", handleUpdatePDFTemplate);
+  app.delete("/api/pdf-templates/:id", handleDeletePDFTemplate);
+
+  // Form download routes
+  app.get("/api/forms/download-filled", handleDownloadFilledForm);
 
   // Legacy demo route
   app.get("/api/demo", handleDemo);
