@@ -432,7 +432,15 @@ export function EnhancedCreateJobModal({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="assignedTo">Assign to Staff</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="assignedTo">Assign to Staff</Label>
+                {smartSuggestions.length > 0 && (
+                  <Badge variant="outline" className="text-xs">
+                    <MapPin className="h-3 w-3 mr-1" />
+                    Smart Suggestions
+                  </Badge>
+                )}
+              </div>
               <Select
                 value={jobData.assignedTo}
                 onValueChange={(value) =>
