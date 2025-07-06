@@ -65,6 +65,43 @@ export function StaffPortalView({
     }
   };
 
+  const handleDownloadForm = async (
+    jobId: string,
+    formId: string,
+    formName: string,
+  ) => {
+    setDownloadingForm(formId);
+    try {
+      const token = localStorage.getItem("auth_token");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const response = await fetch(
+        `/api/forms/download-filled?jobId=${jobId}&formId=${formId}`,
+        { headers },
+      );
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.style.display = "none";
+        a.href = url;
+        a.download = `${formName}_${staff.name}_${new Date().toISOString().split("T")[0]}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        throw new Error("Download failed");
+      }
+    } catch (error) {
+      console.error("Failed to download form:", error);
+      alert("Failed to download form. Please try again.");
+    } finally {
+      setDownloadingForm(null);
+    }
+  };
+
   const getJobForms = (jobId: string) => {
     const job = jobs.find((j) => j.id === jobId);
     if (!job) return [];
