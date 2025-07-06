@@ -46,6 +46,9 @@ export function EnhancedCalendarGrid({
   showJobActions = true,
   initialView = "week",
 }: EnhancedCalendarGridProps) {
+  // Filter jobs based on user permissions
+  const visibleJobs = getCalendarVisibleJobs(jobs, currentUser);
+
   const {
     state,
     actions,
@@ -55,7 +58,7 @@ export function EnhancedCalendarGrid({
     viewTitle,
     handleJobClick,
   } = useEnhancedCalendar({
-    jobs,
+    jobs: visibleJobs,
     initialView,
     onJobClick,
     onJobDoubleClick,
