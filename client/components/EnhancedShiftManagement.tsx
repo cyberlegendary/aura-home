@@ -449,13 +449,15 @@ export function EnhancedShiftManagement({
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDeleteShift(shift.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {!hideDeleteButton && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteShift(shift.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </CardContent>
