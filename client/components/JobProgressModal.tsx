@@ -105,7 +105,7 @@ export function JobProgressModal({
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            note: `Progress Update: ${progress}% - ${status.toUpperCase()} | ${notes}`,
+            content: `Progress Update: ${progress}% - ${status.toUpperCase()} | ${notes}`,
           }),
         });
 
