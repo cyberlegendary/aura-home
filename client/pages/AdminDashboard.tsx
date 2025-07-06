@@ -50,6 +50,7 @@ import { EnhancedShiftManagement } from "@/components/EnhancedShiftManagement";
 import { ClientManagement } from "@/components/ClientManagement";
 import { FormSubmissionList } from "@/components/FormSubmissionCounter";
 import { getCalendarVisibleJobs } from "@/utils/jobVisibility";
+import { StaffPortalView } from "@/components/StaffPortalView";
 import { CompanyManagementModal } from "@/components/CompanyManagementModal";
 import { FormEditModal } from "@/components/FormEditModal";
 import { PDFFormGenerator } from "@/components/PDFFormGenerator";
@@ -106,6 +107,9 @@ export default function AdminDashboard() {
   const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
   const [isSettingsSpinning, setIsSettingsSpinning] = useState(false);
   const [activeTab, setActiveTab] = useState("");
+  const [selectedStaffPortal, setSelectedStaffPortal] =
+    useState<UserType | null>(null);
+  const [showStaffPortal, setShowStaffPortal] = useState(false);
 
   useEffect(() => {
     if (user && (user.role === "admin" || user.role === "supervisor")) {
