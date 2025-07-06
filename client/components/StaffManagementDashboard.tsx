@@ -523,6 +523,26 @@ export function StaffManagementDashboard({
           currentUser={currentUser}
         />
       )}
+
+      {/* Job Creation Modal */}
+      <CreateJobModal
+        open={showJobCreation}
+        onOpenChange={setShowJobCreation}
+        onJobCreated={() => {
+          fetchAllData();
+          setShowJobCreation(false);
+          setSelectedStaffForJob(null);
+        }}
+        selectedJobTime={
+          selectedStaffForJob
+            ? {
+                time: "09:00",
+                date: new Date(),
+                staffId: selectedStaffForJob.id,
+              }
+            : null
+        }
+      />
     </div>
   );
 }
